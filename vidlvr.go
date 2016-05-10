@@ -17,7 +17,7 @@ var yt, _ = regexp.Compile(`^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.
 var im, _ = regexp.Compile(`^[^\s](?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:jpg|gif|png))$`)
 var wv, _ = regexp.Compile(`^[^\s](?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:gifv|webm))$`)
 var vl, _ = regexp.Compile(`!vol [0-9]+`)
-var tx, _ = regexp.Compile(`!write`)
+var tx, _ = regexp.Compile(`!write .+`)
 var fn, _ = regexp.Compile(`[^/]*$`)
 
 func powerscreen() {
