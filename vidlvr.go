@@ -15,7 +15,7 @@ var room = "#Physics"
 
 var yt, _ = regexp.Compile(`^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$`)
 var im, _ = regexp.Compile(`^[^\s](?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:jpg|gif|png))$`)
-var wv, _ = regexp.Compile(`^[^\s](?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:gifv|webm))$`)
+var wv, _ = regexp.Compile(`^[^\s](?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:gifv|webm|mp4|mpg))$`)
 var vl, _ = regexp.Compile(`!vol [0-9]+`)
 var tx, _ = regexp.Compile(`!write .+`)
 var fn, _ = regexp.Compile(`[^/]*$`)
@@ -77,7 +77,7 @@ func main() {
 			powerscreen()
 			cycledisplay()
 			exec.Command("mpv", "-fs", "--loop=inf", e.Message()).Start()
-			go closeafter(flocation, "1h")
+			go closeafter(e.Message(), "1h")
 		}
 	})
 
