@@ -20,14 +20,10 @@ var vl, _ = regexp.Compile(`!vol [0-9]+`)
 var tx, _ = regexp.Compile(`!write .+`)
 var fn, _ = regexp.Compile(`[^/]*$`)
 
+var timeout, _ = time.ParseDuration("1h")
+
 func powerscreen() {
 	exec.Command("xset", "dpms", "force", "on").Run()
-}
-
-func closeafter(name string, duration string) {
-	durationobj, _ := time.ParseDuration(duration)
-	time.Sleep(durationobj)
-	exec.Command("wmctrl", "-c", name).Run()
 }
 
 func cycledisplay() {
@@ -73,11 +69,15 @@ func main() {
 	// Webm or Gifv Player
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if wv.MatchString(e.Message()) {
-			con.Privmsg(room, "Playing gifv or webm -- use `!stop` to abort playback.")
+			con.Privmsg(room, "Playing gifv, webm or mp4 -- use `!stop` to abort playback.")
 			powerscreen()
 			cycledisplay()
-			exec.Command("mpv", "-fs", "--loop=inf", e.Message()).Start()
-			go closeafter(e.Message(), "1h")
+			cmd := exec.Command("mpv", "-fs", "--loop=inf", e.Message())
+			cmd.Start()
+			go func() {
+				time.Sleep(timeout)
+				cmd.Process.Kill()
+			}()
 		}
 	})
 
@@ -97,8 +97,12 @@ func main() {
 			con.Privmsg(room, "Displaying image -- use `!wipe` to close image.")
 			powerscreen()
 			cycledisplay()
-			exec.Command("pqiv", "-itf", flocation).Start()
-			go closeafter(flocation, "1h")
+			cmd := exec.Command("pqiv", "-itf", flocation)
+			cmd.Start()
+			go func() {
+				time.Sleep(timeout)
+				cmd.Process.Kill()
+			}()
 		}
 	})
 
@@ -119,18 +123,24 @@ func main() {
 		}
 	})
 
+	// Write text to the screen
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if tx.MatchString(e.Message()) {
 			powerscreen()
 			cycledisplay()
-			exec.Command("sm", "-b black", "-f white", e.Message()[7:]).Start()
+			cmd := exec.Command("sm", "-b black", "-f white", e.Message()[7:])
+			cmd.Start()
+			go func() {
+				time.Sleep(timeout)
+				cmd.Process.Kill()
+			}()
 		}
 	})
 
 	// Print help info
 	con.AddCallback("PRIVMSG", func(e *irc.Event) {
 		if e.Message() == "!help" {
-			helpmsg := "I can display png, gif, jpg, webm, gifv, or youtube urls. I will ignore urls with a leading space. I can also adjust the volume with `!vol <percent>`. Use `!write` to print text to the screen."
+			helpmsg := "I can display png, gif, jpg, webm, mp4, mpg, gifv, or youtube urls. I will ignore urls with a leading space. I can also adjust the volume with `!vol <percent>`. Use `!write` to print text to the screen."
 			con.Privmsg(room, helpmsg)
 		}
 	})
